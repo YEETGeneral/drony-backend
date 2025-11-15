@@ -14,6 +14,6 @@ app.post('/add-drone', (req, res) => {
   res.status(201).send('Dron dodany pomyślnie')
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is Listening on ${PORT}`)
 })
