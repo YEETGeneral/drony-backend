@@ -15,5 +15,5 @@ app.post('/add-drone', (req, res) => {
 })
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is Listening on ${PORT}.`)
+  console.log(`Server is listening on ${PORT}`)
 })
