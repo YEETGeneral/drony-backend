@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 
 
-const host = os.platform() === 'win32' ? 'fedora' : 'localhost';
+const host = os.platform() === 'win32' ? 'fedora' : 'postgres';
 console.log(`Używany host bazy danych: ${host}`);
 
 const pool = new Pool({
@@ -53,6 +53,22 @@ app.post('/add-location', async (req, res) => {
     res.status(500).json({ error: "Błąd zapisu do bazy." });
   }
 });
+
+app.get('/get-drones', async (req, res) => {
+  try {
+    const query = `SELECT * FROM drones_data;`;
+    const result = await pool.query(query);
+
+    res.json({
+      message: "Dane pobrane pomyślnie!",
+      data: result,
+    });
+
+  } catch (err) {
+    console.error("Błąd SQL:", err);
+    res.status(500).json({ error: "Błąd zapisu do bazy." });
+  }
+})
 
 app.get('/', (req, res) => {
   res.send('Serwer działa!');
