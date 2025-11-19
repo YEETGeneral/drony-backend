@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 
 
-const host = os.platform() === 'win32' ? 'localhost-0' : 'localhost';
+const host = os.platform() === 'win32' ? 'fedora' : 'localhost';
 console.log(`Używany host bazy danych: ${host}`);
 
 const pool = new Pool({
