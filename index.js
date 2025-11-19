@@ -58,6 +58,6 @@ app.get('/', (req, res) => {
   res.send('Serwer działa!');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server działa na porcie ${PORT}`);
-});
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is listening on ${PORT}`)
+})
