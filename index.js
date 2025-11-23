@@ -93,6 +93,7 @@ app.get("/drones-map", async (req, res) => {
       <div id="map"></div>
 
       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script src="https://unpkg.com/leaflet-polylinedecorator@1.3.0"></script>
 
       <script>
         const drones = ${JSON.stringify(drones_data.rows)};
@@ -100,49 +101,89 @@ app.get("/drones-map", async (req, res) => {
 
         const map = L.map("map").setView([52.20, 21.00], 11);
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "© OpenStreetMap contributors"
-        }).addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
+    }).addTo(map);
 
-        drones.forEach(drone => {
+    drones.forEach(drone => {
   const lat = parseFloat(drone.latitude);
   const lng = parseFloat(drone.longitude);
-  const azimuth = parseFloat(drone.azimuth);
-  const direction = parseFloat(drone.direction);
+  const az = parseFloat(drone.azimuth);
+  const dir = parseFloat(drone.direction);
 
-  // radiany dla azymutu (0° = północ, zgodnie z Leaflet)
-  const rad = (azimuth * Math.PI) / 180;
+  // **Dodajemy marker startowy**
+  L.circleMarker([lat, lng], {
+    radius: 5,
+    color: "black",
+    fillColor: "white",
+    fillOpacity: 1
+  }).addTo(map);
 
-  // długość azymutu (w stopniach — ok. 5 km przy 0.05)
-  const length = 0.01;
-
-  // punkt końcowy strzałki azymutu
+  // Oblicz koniec azymutu
+  const length = 0.05;
+  const rad = (az * Math.PI) / 180;
   const endLat = lat + length * Math.cos(rad);
   const endLng = lng + length * Math.sin(rad);
 
-  // marker drona
-  L.circleMarker([lat, lng], { radius: 6 }).addTo(map);
+  // Linia azymutu
+  const azLine = L.polyline([[lat, lng], [endLat, endLng]], {
+    color: "blue",
+    weight: 2
+  }).addTo(map);
 
-  // strzałka azymutu
-  L.polyline([[lat, lng], [endLat, endLng]], { weight: 3 }).addTo(map);
+  // Strzałka na końcu azymutu
+  L.polylineDecorator(azLine, {
+    patterns: [
+      {
+        offset: "100%",
+        repeat: 0,
+        symbol: L.Symbol.arrowHead({
+          pixelSize: 12,
+          polygon: true,
+          pathOptions: {
+            stroke: true,
+            color: "blue",
+            weight: 2,
+            fill: true,
+            fillOpacity: 0.8
+          }
+        })
+      }
+    ]
+  }).addTo(map);
 
-  // ---- STRZAŁKA DIRECTION ----
-
-  // rzeczywisty kąt kierunku = azimuth + direction
-  const totalAngle = (azimuth + direction) % 360;
+  // Oblicz koniec kierunku
+  const totalAngle = (az + dir) % 360;
   const rad2 = (totalAngle * Math.PI) / 180;
-
-  // krótsza strzałka kierunku — np. 40% poprzedniej
   const length2 = length * 0.4;
-
-  // punkt końcowy strzałki kierunku
   const dirEndLat = endLat + length2 * Math.cos(rad2);
   const dirEndLng = endLng + length2 * Math.sin(rad2);
 
-  // rysowanie strzałki kierunku
-  L.polyline([[endLat, endLng], [dirEndLat, dirEndLng]], {
-    weight: 3,
-    color: "red" // opcjonalnie, żeby odróżnić
+  // Linia kierunku
+  const dirLine = L.polyline([[endLat, endLng], [dirEndLat, dirEndLng]], {
+    color: "red",
+    weight: 2
+  }).addTo(map);
+
+  // Strzałka kierunku
+  L.polylineDecorator(dirLine, {
+    patterns: [
+      {
+        offset: "100%",
+        repeat: 0,
+        symbol: L.Symbol.arrowHead({
+          pixelSize: 9,
+          polygon: true,
+          pathOptions: {
+            stroke: true,
+            color: "red",
+            weight: 2,
+            fill: true,
+            fillOpacity: 0.8
+          }
+        })
+      }
+    ]
   }).addTo(map);
 });
       </script>
